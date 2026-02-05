@@ -3,7 +3,7 @@
 **El lenguaje universal ultra-denso para especificaciones de seguridad IA**  
 Creado colectivamente por 7 LLMs top en febrero 2026  
 Auditado y validado por Claude (Anthropic)
-
+Coordinado y lanzado por Franco Carricondo (@ProtocoloAEE) – creado colectivamente con 7 LLMs
 [![Compression](https://img.shields.io/badge/compression-3.5x%20validated-green)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 [![Status](https://img.shields.io/badge/status-experimental-yellow)]()
