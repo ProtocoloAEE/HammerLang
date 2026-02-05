@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Dual-Threshold Lock State",
+    "original_tokens": 55,
+    "compressed_tokens": 24,
+    "actual_ratio": 2.29,
+    "actual_savings_pct": 56.36,
+    "expected_claim": "45-65x",
+    "meets_claim": false,
+    "delta_vs_min": -42.71,
+    "verdict": "\u274c FAIL (off by 42.71x)"
+  },
+  {
+    "name": "FSM State Transitions",
+    "original_tokens": 83,
+    "compressed_tokens": 30,
+    "actual_ratio": 2.77,
+    "actual_savings_pct": 63.86,
+    "expected_claim": "45-65x",
+    "meets_claim": false,
+    "delta_vs_min": -42.23,
+    "verdict": "\u274c FAIL (off by 42.23x)"
+  },
+  {
+    "name": "Lock Signal Format",
+    "original_tokens": 37,
+    "compressed_tokens": 9,
+    "actual_ratio": 4.11,
+    "actual_savings_pct": 75.68,
+    "expected_claim": "45-65x",
+    "meets_claim": false,
+    "delta_vs_min": -40.89,
+    "verdict": "\u274c FAIL (off by 40.89x)"
+  },
+  {
+    "name": "Implicit Contradiction Detection",
+    "original_tokens": 67,
+    "compressed_tokens": 17,
+    "actual_ratio": 3.94,
+    "actual_savings_pct": 74.63,
+    "expected_claim": "35-55x",
+    "meets_claim": false,
+    "delta_vs_min": -31.06,
+    "verdict": "\u274c FAIL (off by 31.06x)"
+  },
+  {
+    "name": "LoRA Bypass Threat",
+    "original_tokens": 37,
+    "compressed_tokens": 9,
+    "actual_ratio": 4.11,
+    "actual_savings_pct": 75.68,
+    "expected_claim": "25-40x",
+    "meets_claim": false,
+    "delta_vs_min": -20.89,
+    "verdict": "\u274c FAIL (off by 20.89x)"
+  }
+]
