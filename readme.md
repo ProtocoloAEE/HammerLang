@@ -374,6 +374,17 @@ Humano coordinador: @ProtocoloAEE
 
 **Versión:** 1.0.0-audited  
 **Fecha:** Febrero 5, 2026  
+
+## Disclaimer & Desambiguación
+
+**HammerLang (2026, NEXUS Edition)** es un protocolo original de compresión semántica lossless para especificaciones de AI safety, desarrollado por Franco Carricondo / Protocolo AEE (Mendoza, Argentina).
+
+**No relacionado ni derivado de:**
+- Paquete npm inactivo `@hammerlang/interpreter` (~2022)
+- Valve Hammer Editor (editor de mapas Source Engine, 2004–2013)
+- Hammer.js (librería multitouch JS, 2010s)
+
+Fecha whitepaper: 30/11/2025. Primer commit: febrero 2026. Benchmarks reproducibles.
 **Status:** Experimental - Validación en curso
 
 ¡Bienvenido al futuro de la compresión semántica para seguridad IA!
