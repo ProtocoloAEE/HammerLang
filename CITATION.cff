@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Carricondo"
+  given-names: "Franco"
+  alias: "@ProtocoloAEE"
+title: "HammerLang v1.0: Lossless Semantic Compression for AI Safety"
+version: 1.0.0
+date-released: 2026-02-05
+url: "https://github.com/ProtocoloAEE/HammerLang"
