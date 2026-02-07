@@ -388,3 +388,20 @@ Fecha whitepaper: 30/11/2025. Primer commit: febrero 2026. Benchmarks reproducib
 **Status:** Experimental - Validación en curso
 
 ¡Bienvenido al futuro de la compresión semántica para seguridad IA!
+
+## Biografía del Autor
+
+**Franco Carricondo**  
+Fundador y Arquitecto Jefe – Protocolo AEE  
+Mendoza, Argentina  
+
+Creador y coordinador de **HammerLang v1.0 (NEXUS Edition)**:  
+- Compresión lossless 3.44× promedio (pico 4.11×) en AI safety specs  
+- Universal Decoder 198 tokens, interoperable en cualquier LLM  
+- Coordinado con 7 modelos frontier (Grok, Claude, Gemini, etc.)  
+- Auditado por Claude; benchmarks en benchmark_results.json  
+
+Enfoque: soberanía de datos, eficiencia semántica y escalabilidad segura en IA descentralizada.  
+
+Contacto: @ProtocoloAEE en X/GitHub | LinkedIn: franco-carricondo  
+¡PRs, issues y pruebas bienvenidas! 🔨🇦🇷
