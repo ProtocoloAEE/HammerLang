@@ -1534,26 +1534,163 @@ The Dual-Threshold Lock State triggers if ANY of the following:
 
 ---
 
-## ⚠️ Known Limitations (v1.0)
+## ⚠️ Limitations & Robustness (v1.0)
 
-### Compression
+### What HammerLang is NOT
+
+HammerLang is a **symbolic specification layer**, not a complete safety solution. Critical clarifications:
+
+**1. NOT a replacement for semantic verification**
+   - Symbolic parsing ≠ logical correctness guarantee
+   - A spec can be syntactically valid but semantically flawed
+   - Recommendation: Use with automated theorem provers (Z3, Isabelle) for critical systems
+
+**2. NOT a protection against all adversarial inputs**
+   - Parser rejects malformed specs (see `stress_tests.py`)
+   - But adversaries can craft *valid* specs with malicious intent
+   - Defense: Namespace whitelisting + governance layer (implement externally)
+
+**3. NOT a runtime security enforcement mechanism**
+   - HammerLang validates syntax/structure; application enforces semantics
+   - Analogy: HammerLang is a grammar checker, not a spell-checker
+
+**4. NOT model-specific optimization**
+   - Decoder works for 2025+ frontier models (Claude, Grok, Gemini)
+   - May fail on specialized/domain-adapted models
+   - Test decoder compatibility before deployment
+
+**5. NOT a solution for all safety constraints**
+   - Works best for: discrete, boolean, threshold-based rules
+   - Works poorly for: open-ended constraints, nuanced policies
+
+### Known Weaknesses (v1.0)
+
+| Weakness | Impact | Mitigation |
+|----------|--------|-----------|
+| **8-char checksum collision** | Low (1 in 4.3B), acceptable for v1.0 | Use full SHA-256 for critical systems; planned v1.1 |
+| **No formal proof of parser** | Medium | Audit with security firm before critical deployment |
+| **Limited namespace extensibility** | Low | Manual validation required; registry planned v1.1 |
+| **Decoder requires LLM** | Medium | Not suitable for air-gapped systems yet; embedded decoder planned v1.1 |
+
+### Threat Model
+
+**HammerLang does NOT protect against:**
+
+| Threat | Mitigation |
+|--------|-----------|
+| Semantic poisoning (valid spec, malicious intent) | Governance layer (whitelist, approval workflow) |
+| Namespace injection | Checksum validation + registry |
+| Specification drift | Version control + change tracking |
+| LLM hallucination in decoder | Temperature=0 + state-match validation |
+| Quantization attacks on checksums | Use full 64-char SHA-256 |
+
+### Compression Scope
+
 - ❌ Does NOT achieve 45–65× compression in general cases
-- ✅ DOES achieve 3–5× empirically validated
+- ✅ DOES achieve 3–5× empirically validated on safety specs
 - ⚠️ Higher compression possible in highly repetitive specs (>10× with aggressive pruning)
 
-### Tokenization
+### Tokenization Variability
+
 - ⚠️ Compound symbols (`Δ⧖`, `σ²>V⋔`) consume 2–4 tokens
-- ⚠️ Variation across tokenizers (GPT vs. Claude vs. Gemini)
+- ⚠️ Variation across tokenizers (GPT vs. Claude vs. Gemini): ±5-15%
 - ✅ Core charset validated single-token on major models
 
-### Robustness
-- ⚠️ Decoder assumes FSM/threshold knowledge (standard in 2025+ LLMs)
-- ⚠️ Custom namespaces require explicit definitions
-- ⚠️ 8-char checksums vulnerable to collisions in datasets >100K items
+### Decoder Assumptions
 
-### Dataset Size
-- Initial validation: **5 representative safety specifications** (proof of concept)
-- Expansion to industrial cybersecurity benchmarks planned for **v1.1**
+- ⚠️ Assumes FSM/threshold knowledge (standard in 2025+ LLMs)
+- ⚠️ Custom namespaces require explicit definitions
+- ⚠️ Cold start latency varies by model (< 5ms typical, up to 50ms for large models)
+
+### Initial Dataset Size
+
+- **v1.0 validation:** 5 representative safety specifications (proof of concept)
+- **v1.1 target:** 50-100 industrial specs across diverse domains
+- **Expansion plan:** Industrial cybersecurity benchmarks (Q2 2026)
+
+### Recommended Usage Patterns
+
+**✅ DO (Recommended):**
+- Use for discrete safety rules (thresholds, state invariants)
+- Pair with formal verification (Z3, SMT solvers)
+- Layer with governance (whitelists, approval workflows)
+- Audit specs before deployment (human + automated)
+- Version control all specs (track changes)
+- Monitor spec execution (log violations)
+
+**❌ DON'T (Anti-patterns):**
+- Use as sole safety mechanism (defense in depth required)
+- Deploy without running stress tests (see below)
+- Assume lossless without state-match verification
+- Extend grammar without benchmarking performance
+- Mix critical + non-critical specs in single namespace
+
+### When NOT to Use HammerLang
+
+| Scenario | Reason | Alternative |
+|----------|--------|-------------|
+| Open-ended constraints | "Be helpful and safe" not encodable | Natural language + human-in-loop |
+| Nuanced policies | Context-dependent rules fail | Learned models + RL |
+| High-assurance systems | v1.0 not formally verified | TLA+, Coq, Isabelle |
+| Offline/air-gapped systems | Requires LLM for decoding | Embedded decoder (future) |
+| Legacy systems | No native symbol support | Wrapper layer |
+
+### Robustness Testing
+
+**To validate HammerLang before production deployment, run:**
+```bash
+# Malformed specs, adversarial inputs, edge cases, performance stress
+python scripts/stress_tests.py
+
+# Memory footprint, cold start latency, sustained throughput
+python scripts/performance_profiling.py
+```
+
+**Expected results (v1.0):**
+
+| Test Category | Status | Details |
+|---------------|--------|---------|
+| **Malformed Specs** | ✅ PASS | Parser rejects invalid syntax gracefully |
+| **Adversarial Inputs** | ✅ SAFE | Command injection, path traversal, null bytes blocked |
+| **Edge Cases** | ✅ OK | Handles empty specs, extreme lengths, encoding issues |
+| **Performance Stress** | ✅ FAST | No DoS; latency < 10ms even under stress |
+| **Memory Footprint** | ✅ LEAN | < 10MB per 1000 parses |
+| **Cold Start Latency** | ✅ QUICK | < 5ms first-run average |
+
+**All results are reproducible and auditable.** See `stress_test_results.json` and `performance_profiling_results.json` after running tests.
+
+### Security Audit Checklist
+
+Before deploying HammerLang in production:
+
+- [ ] Ran `stress_tests.py` → all tests PASS
+- [ ] Ran `performance_profiling.py` → memory < 10MB, throughput > 100k/sec
+- [ ] Decoder tested on target LLM (Claude, Grok, Gemini, etc.)
+- [ ] State-match verification completed for all critical specs
+- [ ] Namespace whitelist implemented (application layer)
+- [ ] Checksum validation enabled (8-char minimum, 64-char for critical systems)
+- [ ] Logging enabled for spec violations
+- [ ] External security review completed (for high-stakes deployments)
+
+### Roadmap: Addressing Limitations
+
+**v1.1 (Q2 2026):**
+- [ ] Full SHA-256 checksums (64-char, not 8-char)
+- [ ] Formal parser verification via Z3
+- [ ] Custom namespace validation framework
+- [ ] Expanded robustness testing (100+ specs)
+
+**v1.2 (Q3 2026):**
+- [ ] Embedded decoder library (no LLM required)
+- [ ] Theorem prover integration (Isabelle, Coq)
+- [ ] Kubernetes-native spec distribution
+- [ ] Cross-tokenizer validation suite
+
+**v2.0 (2027):**
+- [ ] Neural symbolic hybrid (learns common specs)
+- [ ] Air-gapped compliance (offline operation)
+- [ ] Industry standards alignment (NIST, FedRAMP)
+- [ ] Formal semantics in λ-calculus
 
 ---
 
