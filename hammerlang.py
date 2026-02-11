@@ -23,7 +23,7 @@ ALLOWED_NAMESPACES = {'BANK', 'ICT', 'DORA', 'LLP', 'DTL', 'FSM', 'SIG', 'IMP'}
 
 # Production checksums (can be overridden by config/allowed_checksums.json)
 ALLOWED_CHECKSUMS: Dict[str, str] = {
-    "m5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
+    "a5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
     "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
 }
 
@@ -38,7 +38,7 @@ ALLOWED_CHARS = set(
 
 # Regex patterns (FIXED - no escaped brackets)
 HEADER_RE = r'#([A-Z]+):([A-Z_]+):v\d+\.\d+'
-CHECKSUM_RE = r'⊨[a-z0-9]{8}'
+CHECKSUM_RE = r'⊨[a-f0-9]{8}'
 
 # ============================================================================
 # CHECKSUM MANAGEMENT
