@@ -1,9 +1,11 @@
 # HammerLang v1.0 – Deterministic Safety Enforcement (Capa 0)
 
 **1.11M specs/sec** | **0.001ms latency** | **Fail-fast O(1)**  
-**Basel III LCR/NSFR enforcement-ready** | **ISO 20022 message-level safe-to-run**
+**Basel III LCR/NSFR enforcement-ready** | **ISO 20022 safe-to-run**
 
-MIT License | DOI-registered specification | SUPREME-PRO Auditor
+[![SUPREME-PRO](https://img.shields.io/badge/SUPREME--PRO-PASSED-brightgreen)](https://github.com/ProtocoloAEE/HammerLang/actions)
+[![DOI](https://zenodo.org/badge/DOIStatus/10.5281/zenodo.18514425.svg)](https://doi.org/10.5281/zenodo.18514425)
+[![License](https://img.shields.io/github/license/ProtocoloAEE/HammerLang?color=blue)](LICENSE)
 
 > **HammerLang does not calculate regulatory ratios.**  
 > **HammerLang guarantees that only regulatorily valid calculations are allowed to run.**
@@ -12,27 +14,25 @@ MIT License | DOI-registered specification | SUPREME-PRO Auditor
 
 ## 🎯 Capa 0 para Banca Tier-1
 
-- Basel III LCR/NSFR structural enforcement
-- DORA ICT policy validation
-- ISO 20022 payments message-level safe-to-run
-- 0.001ms latency (no SLA impact)
-- Surface Zero deterministic architecture
+- Basel III LCR/NSFR **structural enforcement**
+- DORA ICT **policy validation**
+- ISO 20022 **payments safe-to-run**
+- **0.001ms latency** (no SLA impact)
+- **Surface Zero** deterministic architecture
 
-HammerLang actúa como capa de control **previa a ejecución** en sistemas críticos de **alta criticidad y baja latencia** (pagos, riesgo, governance).
+HammerLang actúa como **capa de control previa a ejecución** en sistemas críticos de alta latencia (pagos, riesgo, governance).
 
 ---
 
 ## 📊 Performance (Structural Enforcement)
 
-All benchmarks measure **deterministic structural validation**, not semantic policy evaluation.
+| Framework       | Specs/sec | Latency | Determinism |
+|-----------------|-----------|---------|-------------|
+| **HammerLang**  | **1.11M** | **0.001ms** | **O(1)** |
+| Guardrails AI   | 13K       | 85ms    | Heuristic |
+| OpenPolicyAgent | 45K       | 22ms    | O(n²)    |
 
-| Framework | Specs/sec | Latency | Determinism |
-|---------|-----------|---------|-------------|
-| **HammerLang** | **1.11M** | **0.001ms** | **O(1)** |
-| Guardrails AI | 13K | 85ms | Heuristic |
-| OpenPolicyAgent | 45K | 22ms | O(n²)* |
-
-\* Depending on policy graph complexity.
+> Benchmarks refer to **structural validation workload**, not semantic reasoning.
 
 ---
 
@@ -70,22 +70,23 @@ No orphaned rules
 
 Explicit scope isolation
 
-Designed for deterministic enforcement, not heuristic interpretation.
+Designed for deterministic enforcement, not heuristic interpretation
 
 ✅ Independent Validation & Reproducibility
 SUPREME-PRO auditor: 100% structural integrity
 
 DOI registered on Zenodo (prior art & reproducibility)
 
-Architecture Decision Records (ADR) documented
+Architecture decisions documented (ADR)
 
-Regulatory interpretation remains the responsibility of the institution
+Regulatory interpretation remains the responsibility of the institution.
 
-🚀 Quickstart
-Structural validation example:
+## 🚀 Quickstart
 
+```bash
 git clone https://github.com/ProtocoloAEE/HammerLang
 python hammerlang.py validate specs/bank_lcr.hml
+
 💼 Commercial Support
 Enterprise pilots, audits, and META-GRAMMAR governance available upon request.
 
