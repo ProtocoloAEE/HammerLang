@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# HammerLang LCR Spec Generator
+# Generates the Basel III LCR canonical spec
+
+mkdir -p specs
+cat > specs/bank_lcr.hml << 'EOF'
+#BANK:LCR:v1.1
+STOCK_HQLA = LEVEL1 + LEVEL2A + LEVEL2B
+LEVEL2_TOTAL = LEVEL2A + LEVEL2B
+CONSTRAINT LEVEL2_TOTAL ≤ 0.4 * STOCK_HQLA
+CONSTRAINT LEVEL2B ≤ 0.15 * STOCK_HQLA
+OUTFLOWS_30D = OUTFLOWS_RETAIL + OUTFLOWS_WHOLESALE + DERIVATIVES_LIQUI
+LCR = STOCK_HQLA / OUTFLOWS_30D
+CONSTRAINT LCR ≥ 1.0
+⊨m5e9f3a7
+EOF
+
+echo "✅ Generated specs/bank_lcr.hml"
