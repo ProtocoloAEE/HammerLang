@@ -1,96 +1,243 @@
-# HammerLang v1.0 Basel III LCR DORA Compliance Engine 1.11M specs/sec
+# HammerLang - Production Parser
 
-**1.11M specs/sec** | **0.001ms latency** | **Fail-fast O(1)**   
-**Basel III LCR/NSFR enforcement-ready** | **ISO 20022 safe-to-run**
+Formal validation for Basel III LCR and regulatory specs with locked mode enforcement.
 
-[![SUPREME-PRO](https://img.shields.io/badge/SUPREME--PRO-PASSED-brightgreen)](https://github.com/ProtocoloAEE/HammerLang/actions)
-[![DOI](https://zenodo.org/badge/DOIStatus/10.5281/zenodo.18514425.svg)](https://doi.org/10.5281/zenodo.18514425)
-[![License](https://img.shields.io/github/license/ProtocoloAEE/HammerLang?color=blue)](LICENSE)
+## 🚀 Quick Start
 
-> **HammerLang does not calculate regulatory ratios.**  
-> **HammerLang guarantees that only regulatorily valid calculations are allowed to run.**
-
----
-
-## 🎯 Capa 0 para Banca Tier-1
-
-- Basel III LCR/NSFR **structural enforcement**
-- DORA ICT **policy validation**
-- ISO 20022 **payments safe-to-run**
-- **0.001ms latency** (no SLA impact)
-- **Surface Zero** deterministic architecture
-
-HammerLang actúa como **capa de control previa a ejecución** en sistemas críticos de alta latencia (pagos, riesgo, governance).
-
----
-
-## 📊 Performance (Structural Enforcement)
-
-| Framework       | Specs/sec | Latency | Determinism |
-|-----------------|-----------|---------|-------------|
-| **HammerLang**  | **1.11M** | **0.001ms** | **O(1)** |
-| Guardrails AI   | 13K       | 85ms    | Heuristic |
-| OpenPolicyAgent | 45K       | 22ms    | O(n²)    |
-
-> Benchmarks refer to **structural validation workload**, not semantic reasoning.
-
----
-
-## 🏦 Basel III LCR – Enforcement Example
-
-```hml
-#BANK:LCR:v1.1
-!LIQUIDITY_COVERAGE⋈[
-  STOCK_HQLA⧉[
-    LEVEL1⊨>60%[CASH,CB_RESERVES],
-    LEVEL2A⊨<40%[CORP_BONDS],
-    LEVEL2B⊨<15%[HIGH_QUAL],
-    LEVEL2_TOTAL⊨≤40%[LEVEL2A+LEVEL2B]
-  ],
-  OUTFLOWS⧉[NET_CASH:[
-    RETAIL⊨10%,
-    UNSECURED⊨25%,
-    SECURED⊨100%
-  ]],
-  RATIO⊨HQLA÷OUTFLOWS≥100%
-] ⊨m5e9f3a7
-SUPREME-PRO Auditor: ✅ Safe-to-run validated
-
-HammerLang does not compute LCR.
-It prevents execution of non-compliant calculations.
-
-🔒 Surface Zero Architecture
-Rejects unknown or undeclared symbols
-
-O(1) fail-fast validation
-
-SHA256 checksum integrity
-
-No orphaned rules
-
-Explicit scope isolation
-
-Designed for deterministic enforcement, not heuristic interpretation
-
-✅ Independent Validation & Reproducibility
-SUPREME-PRO auditor: 100% structural integrity
-
-DOI registered on Zenodo (prior art & reproducibility)
-
-Architecture decisions documented (ADR)
-
-Regulatory interpretation remains the responsibility of the institution.
-
-## 🚀 Quickstart
+### Validate LCR Spec
 
 ```bash
-git clone https://github.com/ProtocoloAEE/HammerLang
-python hammerlang.py validate specs/bank_lcr.hml
+python hammerlang.py validate_locked specs/bank_lcr.hml
+```
 
-💼 Commercial Support
-Enterprise pilots, audits, and META-GRAMMAR governance available upon request.
+### Generate LCR Spec (if needed)
 
-Contact: francocarricondo@gmail.com
+```bash
+bash tools/gen_bank_lcr.sh
+```
 
-ProtocoloAEE
-Franco Carricondo — HammerLang Architect
+### Run Tests
+
+```bash
+python tests/test_lcr.py
+```
+
+---
+
+## 📋 Features
+
+### ✅ Production Locked Mode
+- **Checksum enforcement**: Only approved specs can run
+- **Syntax validation**: Formal grammar checking
+- **Symbol whitelist**: Prevents injection attacks
+- **Namespace control**: Restricts to approved domains
+
+### ✅ Security Hardening
+- Unknown symbol rejection
+- Bracket balance validation
+- Regex injection prevention
+- External config support for prod deployment
+
+---
+
+## 🔒 Production Deployment
+
+### Dev Environment
+Uses hardcoded checksums in `hammerlang.py`:
+```python
+ALLOWED_CHECKSUMS = {
+    "m5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
+    "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
+}
+```
+
+### Production Environment
+Mount `config/allowed_checksums.json` from secure source:
+```json
+{
+  "m5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
+  "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
+}
+```
+
+The parser automatically loads external config if present.
+
+---
+
+## 📁 Project Structure
+
+```
+hammerlang/
+├── hammerlang.py              # Main parser (FIXED regex, validation)
+├── specs/
+│   └── bank_lcr.hml          # Clean spec (no shell script)
+├── tools/
+│   └── gen_bank_lcr.sh       # Generator script (separated)
+├── config/
+│   └── allowed_checksums.json # External checksum config (prod)
+├── tests/
+│   └── test_lcr.py           # Test suite
+└── README.md
+```
+
+---
+
+## 🔬 Validation Rules
+
+### 1. Namespace Header
+```
+✅ #BANK:LCR:v1.1
+❌ #bank:lcr:v1.1  (lowercase)
+❌ BANK:LCR:v1.1   (missing #)
+```
+
+### 2. Checksum Format
+```
+✅ ⊨m5e9f3a7  (8 hex chars)
+❌ ⊨M5E9F3A7  (uppercase)
+❌ ⊨m5e9f3a   (too short)
+```
+
+### 3. Allowed Symbols
+Whitelist includes:
+- `A-Z`, `a-z`, `0-9`, `_` (identifiers)
+- `+-*/<>=().,% ` (operators)
+- `≤≥⊨` (Unicode operators)
+- `[]!@⋈⊗⊢⦿` (HammerLang syntax)
+
+Any other symbol → **REJECTED**
+
+### 4. Namespace Allowlist
+```python
+ALLOWED_NAMESPACES = {
+    'BANK', 'ICT', 'DORA', 
+    'LLP', 'DTL', 'FSM', 'SIG', 'IMP'
+}
+```
+
+---
+
+## 🧪 Test Coverage
+
+Run tests:
+```bash
+python tests/test_lcr.py
+```
+
+Tests include:
+1. ✅ Canonical LCR spec passes
+2. ✅ Tampered checksum rejected
+3. ✅ Unknown symbol rejected
+4. ✅ Missing header rejected
+5. ✅ Unbalanced brackets rejected
+
+Expected output:
+```
+======================================================================
+HAMMERLANG TEST SUITE
+======================================================================
+Test 1: Canonical LCR spec validation...
+✅ PASSED: Canonical LCR spec is valid
+
+Test 2: Tampered checksum rejection...
+✅ PASSED: Tampered checksum rejected
+
+Test 3: Unknown symbol rejection...
+✅ PASSED: Unknown symbol rejected
+
+Test 4: Missing namespace header...
+✅ PASSED: Missing header rejected
+
+Test 5: Unbalanced brackets...
+✅ PASSED: Unbalanced brackets rejected
+
+======================================================================
+TEST RESULTS
+======================================================================
+Passed: 5/5
+Failed: 0/5
+
+✅ ALL TESTS PASSED
+```
+
+---
+
+## 🔧 Extending
+
+### Add New Namespace
+Edit `hammerlang.py`:
+```python
+ALLOWED_NAMESPACES = {'BANK', 'ICT', 'DORA', 'MYNEWNS'}
+```
+
+### Add New Checksum
+Dev:
+```python
+ALLOWED_CHECKSUMS["abc12345"] = "My new spec"
+```
+
+Prod:
+```json
+{
+  "m5e9f3a7": "Basel III LCR v1.1",
+  "abc12345": "My new spec"
+}
+```
+
+### Add Allowed Symbol
+```python
+ALLOWED_CHARS = set(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ..."
+    "⊕"  # Add new operator
+)
+```
+
+---
+
+## 📊 Fixes Applied
+
+### ✅ Fix #1: Clean Specs
+- Moved shell script to `tools/gen_bank_lcr.sh`
+- `specs/bank_lcr.hml` is now pure HML
+
+### ✅ Fix #2: Regex Corrections
+- Fixed: `r'#([A-Z]+):([A-Z_]+):v\d+\.\d+'`
+- Fixed: `r'⊨[a-f0-9]{8}'`
+- No more escaped brackets `\[` → `[`
+
+### ✅ Fix #3: Symbol Whitelist
+- `ALLOWED_CHARS` set enforced
+- Unknown symbols rejected with Unicode info
+
+### ✅ Fix #4: Dev/Prod Separation
+- `load_allowed_checksums()` function
+- External `config/allowed_checksums.json` support
+
+### ✅ Fix #5: Test Suite
+- 5 comprehensive tests
+- Edge cases covered
+- Regression prevention
+
+---
+
+## 🚨 Exit Codes
+
+```bash
+python hammerlang.py validate_locked specs/bank_lcr.hml
+echo $?
+```
+
+- `0`: Validation passed
+- `1`: Validation failed
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 🤝 Author
+
+Franco Carricondo (@ProtocoloAEE)
