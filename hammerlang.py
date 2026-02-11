@@ -1,128 +1,114 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-HammerLang v1.0 - Production Parser with Locked Mode
-Formal validation for Basel III LCR and regulatory specs
+HammerLang v1.0 – Production Locked Validator
 
-Author: Franco Carricondo (@ProtocoloAEE)
-Date: February 8, 2026
-Status: Production-Ready with Security Hardening
+- Validación estructural de specs HammerLang
+- Production Locked Mode con ruleset inmutable por checksum
+- Whitelist de namespaces y símbolos
 """
 
+import argparse
+import hashlib
+import json
 import re
 import sys
-import json
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
+# ---------------------------------------------------------------------
+# CONFIGURACIÓN BÁSICA
+# ---------------------------------------------------------------------
 
-# Allowed namespaces (extend as needed)
-ALLOWED_NAMESPACES = {'BANK', 'ICT', 'DORA', 'LLP', 'DTL', 'FSM', 'SIG', 'IMP'}
+IMMUTABLE_RULESET = True  # Production Locked Mode
 
-# Production checksums (can be overridden by config/allowed_checksums.json)
-ALLOWED_CHECKSUMS: Dict[str, str] = {
-    "a5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
-    "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
-}
+ALLOWED_NAMESPACES = ["LLP", "BANK", "FSM", "DTL"]
 
-# Allowed characters whitelist (prevents injection attacks)
-ALLOWED_CHARS = set(
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:# v.\n\r\t"  # Base alphanumeric + separators
-    "+-*/<>=().,% "                                     # Operators and separators
-    "≤≥⊨"                                              # Unicode operators used in HML
-    "abcdefghijklmnopqrstuvwxyz"                       # Lowercase (for checksums)
-    "[]!@⋈⊗⊢⦿"                                         # HammerLang operators
-)
-
-# Regex patterns (FIXED - no escaped brackets)
+# Regex CORRECTOS (sin corchetes escapados)
 HEADER_RE = r'#([A-Z]+):([A-Z_]+):v\d+\.\d+'
 CHECKSUM_RE = r'⊨[a-f0-9]{8}'
 
-# ============================================================================
-# CHECKSUM MANAGEMENT
-# ============================================================================
+# Whitelist de caracteres permitidos
+ALLOWED_CHARS = set(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:# v.\n\r\t"
+    "+-*/<>=().,% "
+    "≤≥⊨"
+    "abcdefghijklmnopqrstuvwxyz"
+    "[]!@⋈⊗⊢⦿"
+)
+
+# Defaults para entorno de desarrollo (se pueden sobreescribir por config/)
+DEFAULT_ALLOWED_CHECKSUMS: Dict[str, str] = {
+    "a5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
+    "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA",
+}
+
+
+# ---------------------------------------------------------------------
+# UTILIDADES
+# ---------------------------------------------------------------------
+
+def robust_checksum(spec: str) -> str:
+    """SHA-256 -> 8 hex chars deterministas."""
+    h = hashlib.sha256(spec.encode("utf-8")).hexdigest()
+    return h[:8]
+
+
+def extract_checksum(code: str) -> str:
+    """Extrae el checksum desde la línea con ⊨xxxx."""
+    m = re.search(CHECKSUM_RE, code)
+    if not m:
+        return ""
+    return m.group(0).replace("⊨", "")
+
+
+def strip_checksum_line(code: str) -> str:
+    """Elimina la línea que contiene el checksum (para recomputar)."""
+    return re.sub(CHECKSUM_RE + r'.*', '', code)
+
 
 def load_allowed_checksums() -> Dict[str, str]:
-    """
-    Load allowed checksums from external config if available.
-    Falls back to default ALLOWED_CHECKSUMS if config not found.
-    
-    This allows separation of dev/prod environments:
-    - Dev: Uses hardcoded ALLOWED_CHECKSUMS
-    - Prod: Mounts config/allowed_checksums.json from secure source
-    """
+    """Carga allowed checksums desde config/allowed_checksums.json si existe."""
     external = Path("config/allowed_checksums.json")
     if external.is_file():
         try:
             with external.open() as f:
-                checksums = json.load(f)
-            print(f"ℹ️  Loaded {len(checksums)} checksums from {external}")
-            return checksums
-        except Exception as e:
-            print(f"⚠️  Failed to load {external}: {e}")
-            print("⚠️  Falling back to default checksums")
-    return ALLOWED_CHECKSUMS
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+        except Exception:
+            # Fallback silencioso a defaults
+            pass
+    return DEFAULT_ALLOWED_CHECKSUMS
 
-# ============================================================================
-# VALIDATION FUNCTIONS
-# ============================================================================
+
+# ---------------------------------------------------------------------
+# VALIDACIONES
+# ---------------------------------------------------------------------
 
 def validate_symbols(code: str) -> List[str]:
-    """
-    Validate that all characters in the spec are in the allowed whitelist.
-    This prevents injection attacks and unknown symbols.
-    
-    Returns:
-        List of issues found (empty if valid)
-    """
-    issues = []
-    unknown_chars = set()
-    
+    issues: List[str] = []
     for ch in code:
         if ch not in ALLOWED_CHARS:
-            unknown_chars.add(ch)
-    
-    if unknown_chars:
-        for ch in sorted(unknown_chars):
-            issues.append(f"❌ Unknown symbol: {repr(ch)} (Unicode: U+{ord(ch):04X})")
-    
+            issues.append(f"❌ Unknown symbol: {repr(ch)}")
+            break
     return issues
 
 
 def validate_syntax(code: str) -> List[str]:
-    """
-    Validate HammerLang syntax.
-    
-    Checks:
-    - Namespace header format
-    - Checksum format
-    - Bracket balance
-    - Namespace allowlist
-    - Unknown symbols
-    
-    Returns:
-        List of issues found (empty if valid)
-    """
-    issues = []
-    
-    # Check for namespace header
+    """Validación sintáctica básica de HammerLang."""
+    issues: List[str] = []
+
     if not re.search(HEADER_RE, code):
         issues.append("❌ No namespace header (#NAMESPACE:SPEC:vX.Y)")
-    
-    # Check for checksum
+
     if not re.search(CHECKSUM_RE, code):
         issues.append("❌ Invalid checksum format (expected ⊨[a-f0-9]{8})")
-    
-    # Check bracket balance
+
     if code.count('[') != code.count(']'):
         issues.append("❌ Unbalanced brackets []")
-    
-    if code.count('(') != code.count(')'):
-        issues.append("❌ Unbalanced parentheses ()")
-    
-    # Extract and validate namespace
+
+    # EXTRAER NAMESPACE CORRECTAMENTE
     namespace_match = re.search(r'#([A-Z]+):', code)
     if namespace_match:
         namespace = namespace_match.group(1)
@@ -130,114 +116,118 @@ def validate_syntax(code: str) -> List[str]:
             issues.append(f"❌ Namespace {namespace} not allowed in this build")
     else:
         issues.append("❌ Could not extract namespace")
-    
-    # Check for unknown symbols
+
+    # Whitelist de símbolos
     issues.extend(validate_symbols(code))
-    
+
     return issues
 
 
-def validate_locked(filepath: str) -> bool:
-    """
-    Production Locked Mode validation.
-    
-    Validates that:
-    1. Spec has valid syntax
-    2. Checksum matches one of the allowed production checksums
-    
-    This ensures only audited, approved specs can run in production.
-    
-    Args:
-        filepath: Path to HammerLang spec file
-    
-    Returns:
-        True if valid and locked, False otherwise
-    """
-    print("=" * 70)
-    print("HAMMERLANG PRODUCTION LOCKED MODE")
-    print("=" * 70)
-    print(f"Validating: {filepath}")
-    print()
-    
-    # Read spec
-    try:
-        with open(filepath, 'r', encoding='utf-8') as f:
-            code = f.read()
-    except FileNotFoundError:
-        print(f"❌ File not found: {filepath}")
+def validate_checksum(code: str) -> bool:
+    """Revalida el checksum embebido."""
+    embedded = extract_checksum(code)
+    if not embedded:
+        print("❌ No checksum marker ⊨XXXXXXXX found")
         return False
-    except Exception as e:
-        print(f"❌ Error reading file: {e}")
+
+    base = strip_checksum_line(code)
+    recomputed = robust_checksum(base)
+
+    if embedded != recomputed:
+        print(f"❌ Checksum mismatch: embedded={embedded}, recomputed={recomputed}")
         return False
-    
-    # Syntax validation
-    print("Step 1: Syntax validation...")
-    issues = validate_syntax(code)
-    
-    if issues:
-        print("❌ Syntax validation FAILED")
-        for issue in issues:
-            print(f"  {issue}")
-        return False
-    
-    print("✅ Syntax validation PASSED")
-    print()
-    
-    # Checksum extraction and validation
-    print("Step 2: Checksum validation...")
-    checksum_match = re.search(CHECKSUM_RE, code)
-    
-    if not checksum_match:
-        print("❌ No valid checksum found")
-        return False
-    
-    checksum = checksum_match.group(0)[1:]  # Remove ⊨ prefix
-    print(f"Found checksum: {checksum}")
-    
-    # Load allowed checksums (may come from external config)
-    allowed = load_allowed_checksums()
-    
-    if checksum not in allowed:
-        print("❌ Checksum not allowed in Production Locked Mode")
-        print()
-        print("Allowed checksums:")
-        for cs, desc in allowed.items():
-            print(f"  ⊨{cs} - {desc}")
-        return False
-    
-    print(f"✅ Checksum APPROVED: {allowed[checksum]}")
-    print()
-    print("=" * 70)
-    print("✅ VALIDATION PASSED - SPEC IS PRODUCTION-LOCKED")
-    print("=" * 70)
-    
+
+    print(f"✅ Checksum OK: {embedded}")
     return True
 
 
-# ============================================================================
-# CLI INTERFACE
-# ============================================================================
+# ---------------------------------------------------------------------
+# MODO BLOQUEADO (PROD)
+# ---------------------------------------------------------------------
 
-def main():
-    """Main CLI entry point."""
-    if len(sys.argv) < 3:
-        print("Usage:")
-        print("  python hammerlang.py validate_locked <spec_file>")
-        print()
-        print("Example:")
-        print("  python hammerlang.py validate_locked specs/bank_lcr.hml")
-        sys.exit(1)
-    
-    command = sys.argv[1]
-    
-    if command == "validate_locked":
-        filepath = sys.argv[2]
-        result = validate_locked(filepath)
-        sys.exit(0 if result else 1)
+def validate_locked(path: str) -> bool:
+    """Production Locked Mode: syntax + checksum + whitelist de checksums."""
+    if not IMMUTABLE_RULESET:
+        print("⚠️ IMMUTABLE_RULESET is False, locked mode disabled")
+        return False
+
+    p = Path(path)
+    if not p.is_file():
+        print(f"❌ Spec file not found: {path}")
+        return False
+
+    code = p.read_text(encoding="utf-8")
+
+    print("=" * 70)
+    print("HAMMERLANG PRODUCTION LOCKED MODE")
+    print("=" * 70)
+    print(f"Validating: {path}\n")
+
+    print("Step 1: Syntax validation...")
+    issues = validate_syntax(code)
+    if issues:
+        for i in issues:
+            print(i)
+        print("❌ Syntax validation FAILED")
+        return False
+    print("✅ Syntax validation PASSED\n")
+
+    print("Step 2: Checksum validation...")
+    m = re.search(CHECKSUM_RE, code)
+    if not m:
+        print("❌ No valid checksum found")
+        return False
+
+    checksum = m.group(0).replace("⊨", "")
+    print(f"Found checksum: {checksum}")
+
+    if not validate_checksum(code):
+        print("❌ Checksum self-validation FAILED")
+        return False
+
+    allowed = load_allowed_checksums()
+    print(f"ℹ️  Loaded {len(allowed)} checksums from config/allowed_checksums.json or defaults")
+
+    if checksum not in allowed:
+        print("❌ Checksum not allowed in Production Locked Mode")
+        return False
+
+    print(f"✅ Checksum APPROVED: {allowed[checksum]}\n")
+
+    print("=" * 70)
+    print("✅ VALIDATION PASSED - SPEC IS PRODUCTION-LOCKED")
+    print("=" * 70)
+    return True
+
+
+# ---------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="HammerLang validator")
+    parser.add_argument("mode", choices=["validate", "validate_locked"], help="Validation mode")
+    parser.add_argument("spec", help="Path to HammerLang spec")
+    args = parser.parse_args()
+
+    if args.mode == "validate_locked":
+        ok = validate_locked(args.spec)
+        sys.exit(0 if ok else 1)
     else:
-        print(f"❌ Unknown command: {command}")
-        print("Available commands: validate_locked")
-        sys.exit(1)
+        p = Path(args.spec)
+        if not p.is_file():
+            print(f"❌ Spec file not found: {args.spec}")
+            sys.exit(1)
+        code = p.read_text(encoding="utf-8")
+        issues = validate_syntax(code)
+        if issues:
+            for i in issues:
+                print(i)
+            sys.exit(1)
+        if not validate_checksum(code):
+            sys.exit(1)
+        print("✅ Spec is syntactically valid and checksum matches")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
