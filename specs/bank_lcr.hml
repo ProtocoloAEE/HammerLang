@@ -1,0 +1,18 @@
+mkdir -p specs
+cat > specs/bank_lcr.hml << 'EOF'
+#BANK:LCR:v1.1
+!LIQUIDITY_COVERAGE⋈[
+  STOCK_HQLA⧉[
+    LEVEL1⊨>60%[CASH,CB_RESERVES],
+    LEVEL2A⊨<40%[CORP_BONDS],
+    LEVEL2B⊨<15%[HIGH_QUAL],
+    LEVEL2_TOTAL⊨≤40%[LEVEL2A+LEVEL2B]
+  ],
+  OUTFLOWS⧉[NET_CASH:[
+    RETAIL⊨10%,
+    UNSECURED⊨25%,
+    SECURED⊨100%
+  ]],
+  RATIO⊨HQLA÷OUTFLOWS≥100%
+] ⊨m5e9f3a7
+EOF
