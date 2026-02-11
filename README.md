@@ -1,6 +1,6 @@
 # HammerLang v1.0 Basel III LCR DORA Compliance Engine 1.11M specs/sec
 
-**1.11M specs/sec** | **0.001ms latency** | **Fail-fast O(1)**  
+**1.11M specs/sec** | **0.001ms latency** | **Fail-fast O(1)**   
 **Basel III LCR/NSFR enforcement-ready** | **ISO 20022 safe-to-run**
 
 [![SUPREME-PRO](https://img.shields.io/badge/SUPREME--PRO-PASSED-brightgreen)](https://github.com/ProtocoloAEE/HammerLang/actions)
