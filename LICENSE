@@ -1,7 +1,6 @@
 MIT License
 
-Copyright (c) 2026 HammerLang Project (Collective Multi-LLM Creation)
-Human Coordinator: Franco Carricondo (@ProtocoloAEE)
+Copyright (c) 2026 Franco Carricondo (ProtocoloAEE)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-CREDITS:
-This language was created collectively by:
-- Grok (xAI) - Original concept and core syntax
-- Claude (Anthropic) - Technical audit and validation
-- Gemini (Google) - LOGOS proposal foundation
-- ChatGPT (OpenAI) - Symbol refinement
-- DeepSeek - Compression optimizations
-- Perplexity - Use case validation
-- Kimi (Moonshot AI) - Multi-language testing
-
-Coordinated by: Franco Carricondo (@ProtocoloAEE)
