@@ -1,4 +1,7 @@
 {
-  "1dbe8ff1": "Basel III LCR v1.1 – BANK:LCR",
-  "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
+  "m5e9f3a7": {
+    "spec": "Basel III LCR v1.1",
+    "signed_by": "risk@banco.com",
+    "timestamp": "2025-02-13T10:00:00Z"
+  }
 }
