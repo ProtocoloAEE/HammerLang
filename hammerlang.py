@@ -28,12 +28,14 @@ IMMUTABLE_RULESET = True  # Production Locked Mode
 ALLOWED_NAMESPACES = ["LLP", "BANK", "FSM", "DTL"]
 
 # Regex ENDURECIDOS con anclas de seguridad
-HEADER_RE = r'^#([A-Z]+):([A-Z_]+):v\d+\.\d+'  # Ancla ^ al inicio
-CHECKSUM_RE = r'⊨[a-f0-9]{8}(?=\s*$)'  # Ancla de fin de línea - literal UTF-8
+HEADER_RE = r'^#([A-Z]+):([A-Z0-9_]+):v\d+\.\d+'  # Ancla ^ al inicio, permite dígitos en SPEC
+CHECKSUM_RE_PATTERN = r'⊨[a-f0-9]{8}(?=\s*$)'  # Ancla de fin de línea - literal UTF-8
+CHECKSUM_RE = re.compile(CHECKSUM_RE_PATTERN, re.UNICODE | re.MULTILINE)  # Pre-compilado para robustez
 
-# Whitelist de caracteres permitidos
+# Whitelist de caracteres permitidos (incluye newlines explícitos)
 ALLOWED_CHARS = set(
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:# v.\n\r\t"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_:# v."
+    "\n\r\t"  # Newlines y whitespace explícitos
     "+-*/<>=().,% "
     "≤≥⊨"
     "abcdefghijklmnopqrstuvwxyz"
@@ -59,7 +61,7 @@ def robust_checksum(spec: str) -> str:
 
 def extract_checksum(code: str) -> str:
     """Extrae el checksum desde la línea con ⊨xxxx. Usa literal UTF-8."""
-    m = re.search(CHECKSUM_RE, code, re.MULTILINE)
+    m = CHECKSUM_RE.search(code)
     if not m:
         return ""
     # Usar literal UTF-8 para replace (100% match con CHECKSUM_RE)
@@ -78,7 +80,7 @@ def strip_checksum_line(code: str) -> str:
     for line in lines:
         # Solo eliminar la línea si contiene el patrón de checksum completo
         # Usar CHECKSUM_RE directamente para 100% consistency
-        if not re.search(CHECKSUM_RE, line):
+        if not CHECKSUM_RE.search(line):
             filtered_lines.append(line)
     
     return '\n'.join(filtered_lines)
@@ -182,8 +184,8 @@ def validate_syntax(code: str) -> List[str]:
     if not re.search(HEADER_RE, code, re.MULTILINE):
         issues.append("❌ No namespace header (#NAMESPACE:SPEC:vX.Y) at file start")
 
-    # Validar checksum con ancla de fin de línea
-    if not re.search(CHECKSUM_RE, code, re.MULTILINE):
+    # Validar checksum con ancla de fin de línea (pre-compilado, ya tiene flags)
+    if not CHECKSUM_RE.search(code):
         issues.append("❌ Invalid checksum format (expected ⊨[a-f0-9]{8} at line end)")
 
     if code.count('[') != code.count(']'):
@@ -254,7 +256,7 @@ def validate_locked(path: str) -> bool:
     print("✅ Syntax validation PASSED\n")
 
     print("Step 2: Checksum validation...")
-    m = re.search(CHECKSUM_RE, code, re.MULTILINE)
+    m = CHECKSUM_RE.search(code)
     if not m:
         print("❌ No valid checksum found")
         return False
