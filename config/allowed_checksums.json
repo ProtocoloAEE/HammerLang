@@ -1,7 +1,5 @@
-{
-  "m5e9f3a7": {
-    "spec": "Basel III LCR v1.1",
-    "signed_by": "risk@banco.com",
-    "timestamp": "2025-02-13T10:00:00Z"
-  }
-}
+#LLP:TEST:v1.0
+[VALID_RULE]
+liquidity_coverage_ratio >= 100
+[/VALID_RULE]
+⊨b621c12e
