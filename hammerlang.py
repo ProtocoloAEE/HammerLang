@@ -29,7 +29,7 @@ ALLOWED_NAMESPACES = ["LLP", "BANK", "FSM", "DTL"]
 
 # Regex ENDURECIDOS con anclas de seguridad
 HEADER_RE = r'^#([A-Z]+):([A-Z_]+):v\d+\.\d+'  # Ancla ^ al inicio
-CHECKSUM_RE = r'⊨[a-f0-9]{8}(?=\s*$)'  # Ancla de fin de línea
+CHECKSUM_RE = r'⊨[a-f0-9]{8}(?=\s*$)'  # Ancla de fin de línea - literal UTF-8
 
 # Whitelist de caracteres permitidos
 ALLOWED_CHARS = set(
@@ -58,10 +58,11 @@ def robust_checksum(spec: str) -> str:
 
 
 def extract_checksum(code: str) -> str:
-    """Extrae el checksum desde la línea con ⊨xxxx."""
+    """Extrae el checksum desde la línea con ⊨xxxx. Usa literal UTF-8."""
     m = re.search(CHECKSUM_RE, code, re.MULTILINE)
     if not m:
         return ""
+    # Usar literal UTF-8 para replace (100% match con CHECKSUM_RE)
     return m.group(0).replace("⊨", "")
 
 
@@ -69,13 +70,15 @@ def strip_checksum_line(code: str) -> str:
     """
     Elimina ÚNICAMENTE la línea que contiene el checksum (precisión quirúrgica).
     Busca la línea completa que contiene ⊨[checksum] y la elimina.
+    Usa CHECKSUM_RE literal UTF-8 para 100% match consistency.
     """
     lines = code.split('\n')
     filtered_lines = []
     
     for line in lines:
         # Solo eliminar la línea si contiene el patrón de checksum completo
-        if not re.search(r'⊨[a-f0-9]{8}(?=\s*$)', line):
+        # Usar CHECKSUM_RE directamente para 100% consistency
+        if not re.search(CHECKSUM_RE, line):
             filtered_lines.append(line)
     
     return '\n'.join(filtered_lines)
@@ -256,6 +259,7 @@ def validate_locked(path: str) -> bool:
         print("❌ No valid checksum found")
         return False
 
+    # Usar literal UTF-8 para replace (consistency)
     checksum = m.group(0).replace("⊨", "")
     print(f"Found checksum: {checksum}")
 
