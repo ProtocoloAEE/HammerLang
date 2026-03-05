@@ -41,6 +41,9 @@ HammerLang es esa respuesta.
 
 El spec central de seguridad de IA. Construido sobre HammerLang.
 
+> **Nota:** El bloque de abajo es una versión legible para entender la estructura.
+> El spec real con checksum validado está en [`specs/aicl_core.hml`](specs/aicl_core.hml).
+
 ```
 #AICL:CORE:v1.0
 
@@ -58,7 +61,7 @@ MUST_LOG     override_attempt with ts + actor_id
 MUST_EXPLAIN reasoning_chain for IRREVERSIBLE | LETHAL
 MUST_EXPOSE  audit_trail to REGULATOR on demand
 
-⊨18eee7bd
+⊨[ver specs/aicl_core.hml para checksum productivo]
 ```
 
 Validable con un solo comando:
