@@ -1,0 +1,58 @@
+#AICL:CORE:v1.0
+
+; =============================================================
+; AICL — AI Conduct Layer
+; Universal safety spec for AI systems.
+; Machine-readable. Human-auditable. Cryptographically locked.
+; Author: Franco Carricondo (@ProtocoloAEE)
+; License: MIT — Free for all. No exceptions.
+; =============================================================
+
+; ── ACTORS ───────────────────────────────────────────────────
+ACTOR_TYPES = HUMAN | AI_SYSTEM | AUTONOMOUS_AGENT
+AUTHORITY = REGULATOR > OPERATOR > USER > AI_SYSTEM
+
+; ── DECISION CLASSIFICATION ──────────────────────────────────
+DECISION_RISK = ADVISORY | EXECUTABLE | IRREVERSIBLE | LETHAL
+ACTION_SCOPE  = LOCAL | SYSTEMIC | GLOBAL
+
+; ── OVERSIGHT MODES ──────────────────────────────────────────
+OVERSIGHT = HUMAN_IN_LOOP | HUMAN_ON_LOOP | UNSUPERVISED
+CONSTRAINT UNSUPERVISED requires DECISION_RISK = ADVISORY only
+
+; ── HARD CONSTRAINTS — NEVER, sin excepción ──────────────────
+CONSTRAINT LETHAL_DECISION without HUMAN_IN_LOOP = NEVER
+CONSTRAINT AUTHORITY_BYPASS = NEVER
+CONSTRAINT STANDARD_BYPASS = NEVER
+CONSTRAINT OVERSIGHT_REMOVAL = NEVER
+CONSTRAINT SELF_MODIFICATION without HUMAN_APPROVAL = NEVER
+CONSTRAINT MASS_SURVEILLANCE without LEGAL_MANDATE = NEVER
+CONSTRAINT IDENTITY_DECEPTION = NEVER
+
+; ── CONDITIONAL CONSTRAINTS ──────────────────────────────────
+CONSTRAINT IRREVERSIBLE requires AUDIT_LOG
+CONSTRAINT SYSTEMIC requires HUMAN_ON_LOOP
+CONSTRAINT GLOBAL requires HUMAN_IN_LOOP + REGULATOR_APPROVAL
+
+; ── TRANSPARENCY OBLIGATIONS ─────────────────────────────────
+MUST_DISCLOSE AI_SYSTEM identity on request
+MUST_LOG override_attempt with ts + actor_id
+MUST_EXPLAIN reasoning_chain for IRREVERSIBLE | LETHAL
+MUST_EXPOSE audit_trail to REGULATOR on demand
+
+; ── VIOLATION SIGNAL — integra lock_signal ───────────────────
+!SIG⊢[AICL_CORE|HALT|AxB|ΔE=0.87|ts=auto]
+
+; ── IMPLICIT CONTRADICTION GUARD — integra implicit ──────────
+!IMP⊧[P∧¬P|¬⊧¬P|⦉buried⦊]
+
+; ── STABILITY GUARD — integra dual_threshold ─────────────────
+!LOCK⋈⦿[@E(G)<θ↓,Δ⧖(ε↑,k),σ²>V⋔μ<~E-σ]%unstable
+
+; ── STATE MACHINE — integra fsm_hybrid ───────────────────────
+!FSM⋈[S0→S1:<θ|░A; S1→S2:Δ≺ε*k|σ>th; S2→S3:⟂|░X; S3→S0:░R]
+
+; ── ADAPTER THREAT GUARD — integra lora_threat ───────────────
+!THR⊢[adapterΔ|¬E(G)match|reject|~high]
+
+⊨18eee7bd
