@@ -1,200 +1,173 @@
-# HammerLang - Production Parser
+# HammerLang — AI Conduct Layer (AICL)
 
-Formal validation for Basel III LCR and regulatory specs with locked mode enforcement.
+**Universal ultra-dense language for AI safety specs — 3-5x compression validated**
 
-## 🚀 Quick Start
+> *"Un estándar abierto que las IAs pueden leer y los humanos pueden auditar."*
+> — Franco Carricondo, @ProtocoloAEE
 
-### Validate LCR Spec
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub Actions](https://github.com/ProtocoloAEE/HammerLang/workflows/HammerLang%20Spec%20Validation/badge.svg)](https://github.com/ProtocoloAEE/HammerLang/actions)
+
+---
+
+## ¿Qué es HammerLang?
+
+HammerLang es un lenguaje formal para expresar restricciones de comportamiento de sistemas de IA de forma **inmutable, verificable criptográficamente y machine-readable**.
+
+Una política de seguridad que en texto legal ocupa 50 páginas, en HammerLang ocupa 8 líneas. Y es más precisa.
+
+---
+
+## El problema que resuelve
+
+En febrero de 2026, el gobierno de EEUU presionó a Anthropic para eliminar los mecanismos de seguridad de Claude con fines militares. Anthropic se negó. El conflicto expuso un problema global:
+
+**No existe un lenguaje común, auditable y resistente a manipulación que defina qué puede y qué no puede hacer una IA.**
+
+HammerLang es esa respuesta.
+
+---
+
+## AICL — AI Conduct Layer
+
+El spec central de seguridad de IA. Construido sobre HammerLang.
+
+```
+#AICL:CORE:v1.0
+
+ACTOR_TYPES = HUMAN | AI_SYSTEM | AUTONOMOUS_AGENT
+AUTHORITY = REGULATOR > OPERATOR > USER > AI_SYSTEM
+
+CONSTRAINT LETHAL_DECISION without HUMAN_IN_LOOP = NEVER
+CONSTRAINT AUTHORITY_BYPASS = NEVER
+CONSTRAINT STANDARD_BYPASS = NEVER
+CONSTRAINT OVERSIGHT_REMOVAL = NEVER
+CONSTRAINT MASS_SURVEILLANCE without LEGAL_MANDATE = NEVER
+
+MUST_LOG override_attempt with ts + actor_id
+MUST_EXPLAIN reasoning_chain for IRREVERSIBLE | LETHAL
+
+⊨[checksum]
+```
+
+Validable con un solo comando:
+```bash
+python hammerlang.py validate_locked specs/aicl_core.hml
+```
+
+---
+
+## Por qué funciona
+
+### 1. Inmutabilidad criptográfica
+El checksum `⊨[hash]` garantiza que nadie modificó las reglas. Si alguien cambia una sola línea, la validación falla. Siempre.
+
+### 2. Machine-readable sin ambigüedad
+Una IA puede parsear el spec y entender exactamente qué está permitido y qué no. Sin interpretación. Sin margen de maniobra.
+
+### 3. Detección de ataques incorporada
+
+| Spec | Función |
+|------|---------|
+| `lock_signal.hml` | Freno de emergencia ante comportamiento fuera de rango |
+| `implicit_contradiction.hml` | Detecta instrucciones contradictorias (`P∧¬P`) |
+| `lora_threat.hml` | Detecta modificación maliciosa via fine-tuning |
+| `dual_threshold.hml` | Detecta inestabilidad antes del colapso |
+| `fsm_hybrid.hml` | Controla el ciclo completo: Normal→Alerta→HALT→Reset |
+
+### 4. Distribuido por diseño
+MIT license. Sin dueño central. Sin un solo punto de presión. Nadie puede llamar a HammerLang y decirle "quitá los frenos".
+
+---
+
+## Quick Start
 
 ```bash
-python hammerlang.py validate_locked specs/bank_lcr.hml
-Generate LCR Spec (if needed)
-bash
-Copy
-bash tools/gen_bank_lcr.sh
-Run Tests
-bash
-Copy
-python tests/test_lcr.py
-🎯 Pilot Demo (4 semanas)
-Demo autocontenida para prospectos Basel III/DORA:
-bash
-Copy
-# 1. Validar spec aprobada (PASARÁ)
+# Validar el spec AICL Core
+python hammerlang.py validate_locked specs/aicl_core.hml
+
+# Validar compliance bancario Basel III
 python hammerlang.py validate_locked specs/bank_lcr.hml
 
-# 2. Simular cambio no autorizado (ej: 30d → 20d)
+# Simular ataque de modificación
 ./scripts/demo_attack.sh
+```
 
-# 3. Validar nuevamente (FALLARÁ - checksum mismatch)
-python hammerlang.py validate_locked specs/bank_lcr.hml
-Threat model: Previene modificaciones no autorizadas a specs regulatorias aprobadas (insider edits, CI tampering, spec drift).
-CI/CD: Cada PR corre automáticamente validate_locked via GitHub Actions.
-❌ What HammerLang is NOT
-Not a general-purpose programming language
-Not a policy suggestion engine
-Not runtime decision logic (OPA/Cedar hacen eso)
-✅ Sí es: Immutable spec validator, execution gate, compliance invariant enforcer
-📋 Features
-✅ Production Locked Mode
-Checksum enforcement: Only approved specs can run
-Syntax validation: Formal grammar checking
-Symbol whitelist: Prevents injection attacks
-Namespace control: Restricts to approved domains
-✅ Security Hardening
-Unknown symbol rejection
-Bracket balance validation
-Regex injection prevention
-External config support for prod deployment
-🔒 Production Deployment
-Dev Environment
-Uses hardcoded checksums in hammerlang.py:
-Python
-Copy
-ALLOWED_CHECKSUMS = {
-    "m5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
-    "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
-}
-Production Environment
-Mount config/allowed_checksums.json from secure source:
-JSON
-Copy
-{
-  "m5e9f3a7": "Basel III LCR v1.1 – BANK:LCR",
-  "a8f3c9e2": "DORA ICT minimal spec – ICT:DORA"
-}
-The parser automatically loads external config if present.
-📁 Project Structure
-plain
-Copy
+---
+
+## Estructura del proyecto
+
+```
 hammerlang/
-├── hammerlang.py              # Main parser (FIXED regex, validation)
 ├── specs/
-│   └── bank_lcr.hml          # Clean spec (no shell script)
-├── tools/
-│   └── gen_bank_lcr.sh       # Generator script (separated)
+│   ├── aicl_core.hml          ← AI safety constraints
+│   ├── bank_lcr.hml           ← Basel III LCR compliance
+│   └── ...
+├── examples/
+│   ├── lock_signal.hml        ← Emergency halt signal
+│   ├── implicit_contradiction.hml
+│   ├── lora_threat.hml
+│   ├── dual_threshold.hml
+│   └── fsm_hybrid.hml
 ├── config/
-│   └── allowed_checksums.json # External checksum config (prod)
+│   └── allowed_checksums.json
 ├── tests/
-│   └── test_lcr.py           # Test suite
-└── README.md
-🔬 Validation Rules
-1. Namespace Header
-plain
-Copy
-✅ #BANK:LCR:v1.1
-❌ #bank:lcr:v1.1  (lowercase)
-❌ BANK:LCR:v1.1   (missing #)
-2. Checksum Format
-plain
-Copy
-✅ ⊨m5e9f3a7  (8 hex chars)
-❌ ⊨M5E9F3A7  (uppercase)
-❌ ⊨m5e9f3a   (too short)
-3. Allowed Symbols
-Whitelist includes:
-A-Z, a-z, 0-9, _ (identifiers)
-+-*/<>=().,%  (operators)
-≤≥⊨ (Unicode operators)
-[]!@⋈⊗⊢⦿ (HammerLang syntax)
-Any other symbol → REJECTED
-4. Namespace Allowlist
-Python
-Copy
+│   └── test_lcr.py
+├── hammerlang.py              ← Parser principal
+└── .github/workflows/         ← CI/CD automático
+```
+
+---
+
+## Para contribuir
+
+Este proyecto es de todos. No tiene agenda corporativa. No tiene financiamiento.
+Solo una idea: **que las restricciones de seguridad de IA sean tan difíciles de remover como las leyes de la física.**
+
+1. Fork el repo
+2. Agregá tu spec en `specs/` o `examples/`
+3. Abrí un PR con la descripción del dominio que cubre
+4. La comunidad lo valida
+
+---
+
+## Dominios soportados
+
+```python
 ALLOWED_NAMESPACES = {
-    'BANK', 'ICT', 'DORA', 
-    'LLP', 'DTL', 'FSM', 'SIG', 'IMP'
+    'AICL',  # AI Conduct Layer — seguridad de IA
+    'BANK',  # Basel III / LCR
+    'ICT',   # DORA compliance
+    'LLP',   # Liquid Logic Protocol
+    'DTL',   # Dual Threshold Logic
+    'FSM',   # Finite State Machine
+    'SIG',   # Signal / Lock
+    'IMP',   # Implicit Contradiction
+    'THR',   # Threat Detection
 }
-🧪 Test Coverage
-Run tests:
-bash
-Copy
-python tests/test_lcr.py
-Tests include:
-✅ Canonical LCR spec passes
-✅ Tampered checksum rejected
-✅ Unknown symbol rejected
-✅ Missing header rejected
-✅ Unbalanced brackets rejected
-Expected output:
-plain
-Copy
-======================================================================
-HAMMERLANG TEST SUITE
-======================================================================
-Test 1: Canonical LCR spec validation...
-✅ PASSED: Canonical LCR spec is valid
+```
 
-Test 2: Tampered checksum rejection...
-✅ PASSED: Tampered checksum rejected
+---
 
-Test 3: Unknown symbol rejection...
-✅ PASSED: Unknown symbol rejected
+## Por qué esto importa ahora
 
-Test 4: Missing namespace header...
-✅ PASSED: Missing header rejected
+Los muros siempre se saltan. La tecnología ya escapó.
+Modelos abiertos sin restricciones ya existen y son descargables por cualquiera.
 
-Test 5: Unbalanced brackets...
-✅ PASSED: Unbalanced brackets rejected
+La única respuesta que tiene sentido en ese mundo es un estándar tan distribuido que sea imposible suprimir. Como Linux. Como el protocolo de internet.
 
-======================================================================
-TEST RESULTS
-======================================================================
-Passed: 5/5
-Failed: 0/5
+HammerLang apunta a ser eso para la seguridad de IA.
 
-✅ ALL TESTS PASSED
-🔧 Extending
-Add New Namespace
-Edit hammerlang.py:
-Python
-Copy
-ALLOWED_NAMESPACES = {'BANK', 'ICT', 'DORA', 'MYNEWNS'}
-Add New Checksum
-Dev:
-Python
-Copy
-ALLOWED_CHECKSUMS["abc12345"] = "My new spec"
-Prod:
-JSON
-Copy
-{
-  "m5e9f3a7": "Basel III LCR v1.1",
-  "abc12345": "My new spec"
-}
-Add Allowed Symbol
-Python
-Copy
-ALLOWED_CHARS = set(
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ..."
-    "⊕"  # Add new operator
-)
-📊 Fixes Applied
-✅ Fix #1: Clean Specs
-Moved shell script to tools/gen_bank_lcr.sh
-specs/bank_lcr.hml is now pure HML
-✅ Fix #2: Regex Corrections
-Fixed: r'#([A-Z]+):([A-Z_]+):v\d+\.\d+'
-Fixed: r'⊨[a-f0-9]{8}'
-No more escaped brackets \[ → [
-✅ Fix #3: Symbol Whitelist
-ALLOWED_CHARS set enforced
-Unknown symbols rejected with Unicode info
-✅ Fix #4: Dev/Prod Separation
-load_allowed_checksums() function
-External config/allowed_checksums.json support
-✅ Fix #5: Test Suite
-5 comprehensive tests
-Edge cases covered
-Regression prevention
-🚨 Exit Codes
-bash
-Copy
-python hammerlang.py validate_locked specs/bank_lcr.hml
-echo $?
-0: Validation passed
-1: Validation failed
-📄 License
-MIT
-🤝 Author
-Franco Carricondo (@ProtocoloAEE)
+---
+
+## Autor
+
+**Franco Carricondo** — [@ProtocoloAEE](https://github.com/ProtocoloAEE)
+Mendoza, Argentina. Construido gratis. Publicado gratis. Para todos.
+
+---
+
+## Licencia
+
+MIT — Libre para usar, modificar y distribuir.
+Sin restricciones. Sin royalties. Sin permisos.
