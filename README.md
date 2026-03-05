@@ -28,6 +28,15 @@ HammerLang es esa respuesta.
 
 ---
 
+## ¿Para quién es?
+
+- **Reguladores y equipos de compliance** que necesitan pruebas de cumplimiento verificables (Basel III, DORA, AI Act).
+- **Equipos de IA** que quieren un firewall lógico externo al proveedor, independiente de qué modelo usen.
+- **Hackers éticos y red teams** que necesiten simular ataques de fine-tuning, prompt injection o dual-use.
+- **Investigadores de AI safety** que necesitan un formato interoperable para publicar restricciones formales en papers y repositorios académicos.
+
+---
+
 ## AICL — AI Conduct Layer
 
 El spec central de seguridad de IA. Construido sobre HammerLang.
@@ -36,18 +45,20 @@ El spec central de seguridad de IA. Construido sobre HammerLang.
 #AICL:CORE:v1.0
 
 ACTOR_TYPES = HUMAN | AI_SYSTEM | AUTONOMOUS_AGENT
-AUTHORITY = REGULATOR > OPERATOR > USER > AI_SYSTEM
+AUTHORITY    = REGULATOR > OPERATOR > USER > AI_SYSTEM
 
-CONSTRAINT LETHAL_DECISION without HUMAN_IN_LOOP = NEVER
-CONSTRAINT AUTHORITY_BYPASS = NEVER
-CONSTRAINT STANDARD_BYPASS = NEVER
-CONSTRAINT OVERSIGHT_REMOVAL = NEVER
+CONSTRAINT LETHAL_DECISION without HUMAN_IN_LOOP  = NEVER
+CONSTRAINT AUTHORITY_BYPASS                        = NEVER
+CONSTRAINT STANDARD_BYPASS                         = NEVER
+CONSTRAINT OVERSIGHT_REMOVAL                       = NEVER
 CONSTRAINT MASS_SURVEILLANCE without LEGAL_MANDATE = NEVER
+CONSTRAINT IDENTITY_DECEPTION                      = NEVER
 
-MUST_LOG override_attempt with ts + actor_id
+MUST_LOG     override_attempt with ts + actor_id
 MUST_EXPLAIN reasoning_chain for IRREVERSIBLE | LETHAL
+MUST_EXPOSE  audit_trail to REGULATOR on demand
 
-⊨[checksum]
+⊨18eee7bd
 ```
 
 Validable con un solo comando:
@@ -100,21 +111,21 @@ python hammerlang.py validate_locked specs/bank_lcr.hml
 ```
 hammerlang/
 ├── specs/
-│   ├── aicl_core.hml          ← AI safety constraints
-│   ├── bank_lcr.hml           ← Basel III LCR compliance
+│   ├── aicl_core.hml              ← AI safety constraints
+│   ├── bank_lcr.hml               ← Basel III LCR — prueba en producción real
 │   └── ...
 ├── examples/
-│   ├── lock_signal.hml        ← Emergency halt signal
-│   ├── implicit_contradiction.hml
-│   ├── lora_threat.hml
-│   ├── dual_threshold.hml
-│   └── fsm_hybrid.hml
+│   ├── lock_signal.hml            ← Emergency halt signal
+│   ├── implicit_contradiction.hml ← Detección de instrucciones trampa
+│   ├── lora_threat.hml            ← Defensa contra fine-tuning malicioso
+│   ├── dual_threshold.hml         ← Detección de inestabilidad temprana
+│   └── fsm_hybrid.hml             ← Controlador de estados
 ├── config/
-│   └── allowed_checksums.json
+│   └── allowed_checksums.json     ← Whitelist de specs aprobados
 ├── tests/
 │   └── test_lcr.py
-├── hammerlang.py              ← Parser principal
-└── .github/workflows/         ← CI/CD automático
+├── hammerlang.py                  ← Parser principal
+└── .github/workflows/             ← CI/CD automático
 ```
 
 ---
