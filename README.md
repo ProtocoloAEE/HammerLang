@@ -71,6 +71,49 @@ python hammerlang.py validate_locked specs/aicl_core.hml
 
 ---
 
+## AICL:ORIGIN — Verificación de Origen de Contenido
+
+El spec para saber si cualquier contenido fue producido por un humano, una IA, o ambos.
+Sin firma = sin certificación. Simple. Universal. Verificable con un QR.
+
+- **Cualquier persona** puede verificar el origen escaneando un QR — sin instalar nada, sin saber programar
+- **Localización opcional** — protege a periodistas, disidentes y cualquier persona en riesgo
+- **Tres estados posibles:** `CERTIFIED` | `UNVERIFIED` | `TAMPERED`
+
+> **Nota:** El bloque de abajo es una versión legible.
+> El spec real con checksum validado está en [`specs/aicl_origin.hml`](specs/aicl_origin.hml).
+
+```
+#AICL:ORIGIN:v1.0
+
+ORIGIN_TYPES = HUMAN | AI | HYBRID
+TOOL         = name + version + provider
+
+SIGNATURE          = ORIGIN + TOOL + TIMESTAMP + CONTENT_HASH
+SIGNATURE_OPTIONAL = LOCATION
+
+CONSTRAINT SIGNATURE_REMOVAL    = NEVER
+CONSTRAINT ORIGIN_FALSIFICATION = NEVER
+CONSTRAINT UNSIGNED             = NO_CERTIFICATION
+
+MUST_EMBED  qr_verification_code in output
+MUST_EXPOSE public_verification_endpoint
+MUST_LOG    verification_attempts with ts
+
+CERTIFIED  = signature valid + origin declared + tool verified
+UNVERIFIED = no signature present
+TAMPERED   = signature invalid or content modified
+
+⊨[ver specs/aicl_origin.hml para checksum productivo]
+```
+
+Validable con un solo comando:
+```bash
+python hammerlang.py validate_locked specs/aicl_origin.hml
+```
+
+---
+
 ## Por qué funciona
 
 ### 1. Inmutabilidad criptográfica
@@ -100,6 +143,9 @@ MIT license. Sin dueño central. Sin un solo punto de presión. Nadie puede llam
 # Validar el spec AICL Core
 python hammerlang.py validate_locked specs/aicl_core.hml
 
+# Validar verificación de origen
+python hammerlang.py validate_locked specs/aicl_origin.hml
+
 # Validar compliance bancario Basel III
 python hammerlang.py validate_locked specs/bank_lcr.hml
 
@@ -115,6 +161,7 @@ python hammerlang.py validate_locked specs/bank_lcr.hml
 hammerlang/
 ├── specs/
 │   ├── aicl_core.hml              ← AI safety constraints
+│   ├── aicl_origin.hml            ← Content origin verification
 │   ├── bank_lcr.hml               ← Basel III LCR — prueba en producción real
 │   └── ...
 ├── examples/
@@ -149,7 +196,7 @@ Solo una idea: **que las restricciones de seguridad de IA sean tan difíciles de
 
 ```python
 ALLOWED_NAMESPACES = {
-    'AICL',  # AI Conduct Layer — seguridad de IA
+    'AICL',  # AI Conduct Layer — seguridad de IA y origen de contenido
     'BANK',  # Basel III / LCR
     'ICT',   # DORA compliance
     'LLP',   # Liquid Logic Protocol
