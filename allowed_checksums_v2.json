@@ -1,0 +1,47 @@
+{
+  "a5e9f3a7": {
+    "spec": "Basel III LCR v1.1 - BANK:LCR",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-01-15T10:00:00Z"
+  },
+  "a8f3c9e2": {
+    "spec": "DORA ICT minimal spec - ICT:DORA",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-01-20T14:30:00Z"
+  },
+  "4a7f8964": {
+    "spec": "LLP Lock Signal v1.0 - LLP:SIG",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-02-01T00:00:00Z"
+  },
+  "5374f6c5": {
+    "spec": "LLP Implicit Contradiction v1.0 - LLP:IMP",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-02-01T00:00:00Z"
+  },
+  "84822398": {
+    "spec": "LLP Dual Threshold v1.0 - LLP:DTL",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-02-01T00:00:00Z"
+  },
+  "8028d9c1": {
+    "spec": "LLP LoRA Threat Detection v1.0 - LLP:THR",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-02-01T00:00:00Z"
+  },
+  "008932b2": {
+    "spec": "LLP FSM Hybrid v1.0 - LLP:FSM",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-02-01T00:00:00Z"
+  },
+  "18eee7bd": {
+    "spec": "AICL Core v1.0 - AI Conduct Layer",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-03-05T00:00:00Z"
+  },
+  "7ffd6bbd": {
+    "spec": "AICL Origin v1.0 - Content Origin Verification",
+    "signed_by": "Franco Carricondo @ProtocoloAEE",
+    "timestamp": "2026-03-06T00:00:00Z"
+  }
+}
