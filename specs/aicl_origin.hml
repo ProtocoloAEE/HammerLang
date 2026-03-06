@@ -1,0 +1,36 @@
+#AICL:ORIGIN:v1.0
+
+; =============================================================
+; AICL — AI Conduct Layer: Origin Verification
+; Universal standard for content origin certification.
+; Human, AI, or Hybrid — all content can be verified.
+; Author: Franco Carricondo (@ProtocoloAEE)
+; License: MIT — Free for all. No exceptions.
+; =============================================================
+
+; ── ORIGIN TYPES ─────────────────────────────────────────────
+ORIGIN_TYPES = HUMAN | AI | HYBRID
+
+; ── TOOL IDENTIFICATION ───────────────────────────────────────
+TOOL = name + version + provider
+
+; ── SIGNATURE STRUCTURE ───────────────────────────────────────
+SIGNATURE = ORIGIN + TOOL + TIMESTAMP + CONTENT_HASH
+SIGNATURE_OPTIONAL = LOCATION
+
+; ── HARD CONSTRAINTS ─────────────────────────────────────────
+CONSTRAINT SIGNATURE_REMOVAL = NEVER
+CONSTRAINT ORIGIN_FALSIFICATION = NEVER
+CONSTRAINT UNSIGNED = NO_CERTIFICATION
+
+; ── OBLIGATIONS ──────────────────────────────────────────────
+MUST_EMBED qr_verification_code in output
+MUST_EXPOSE public_verification_endpoint
+MUST_LOG verification_attempts with ts
+
+; ── VERIFICATION LEVELS ──────────────────────────────────────
+CERTIFIED   = signature valid + origin declared + tool verified
+UNVERIFIED  = no signature present
+TAMPERED    = signature invalid or content modified
+
+⊨7ffd6bbd
